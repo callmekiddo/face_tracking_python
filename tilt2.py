@@ -5,13 +5,13 @@ arduino =serial.Serial('COM3', 9600)
 time.sleep(2)
 print("Connecting to Arduino ...")
 
-cam = cv2.VideoCapture(0) # (0) chỉ số của camera
+cam = cv2.VideoCapture(1) # (0) chỉ số của camera
 time.sleep(2)
 
-def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy 
+def detecteFaceDNN(net, frame, conf_threshold=0.65): # ngưỡng tin cậy 
     height = frame.shape[0]
     width = frame.shape[1]
-    blob = cv2.dnn.blobFromImage(frame, 0.8, (400, 400), (104, 117, 123), False, False) 
+    blob = cv2.dnn.blobFromImage(frame, 1.6, (300, 300), (104, 117, 123), False, False) 
     net.setInput(blob)
     detections = net.forward()
     boxes = []
@@ -32,15 +32,15 @@ def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy
                           int(round(height / 200)))
             circle_s = cv2.circle(frame, (centre_s_x, centre_s_y) , 3, (0,255,0), 3)
             centre_face = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
+            # centre_s = cv2.rectangle(frame, (centre_s_x - 5, centre_s_x - 5), 
+            #             (centre_s_x + 5, centre_s_x + 5), (0, 255, 0), int(round(height / 200)))
             
-            if x1 <= centre_s_x <= x2 and y1 <= centre_s_y <= y2 :
-                pass    # chấm giữa trong hình mặt thì không diều khiển
+            
+            if y1 - 30< centre_s_y < y2 - 30:
+                pass    # chấm giữa mặt trong hình vuông giữa thì không diều khiển
             else:
-                pan_position = int(face_centre_x - centre_s_x) # thay đổi góc quay ngang
-                tilt_position = int(face_centre_y - centre_s_y)  # thay đổi góc quay dọc
+                tilt_position = int(face_centre_y - centre_s_y) # thay đổi góc quay ngang
                 
-                arduino.write(b'X')
-                arduino.write(str(pan_position).encode())
                 arduino.write(b'Y')
                 arduino.write(str(tilt_position).encode())
     return frame, boxes

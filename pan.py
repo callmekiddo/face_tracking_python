@@ -6,13 +6,12 @@ arduino =serial.Serial('COM3', 9600)
 time.sleep(2)
 print("Connecting to Arduino ...")
 
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(1)
 time.sleep(2)
 
-def detecteFaceDNN(net, frame, conf_threshold=0.6): #do chinh xac nhan dien khuon mat
+def detecteFaceDNN(net, frame, conf_threshold=0.7): #do chinh xac nhan dien khuon mat
     height = frame.shape[0]
     width = frame.shape[1]
-    square_size = 50
     blob = cv2.dnn.blobFromImage(frame, 1.0, (450, 450), (104, 117, 123), False, False)
     net.setInput(blob)
     detections = net.forward()
@@ -27,18 +26,19 @@ def detecteFaceDNN(net, frame, conf_threshold=0.6): #do chinh xac nhan dien khuo
             y2 = int(detections[0, 0, i, 6] * height)
             boxes.append([x1, y1, x2, y2])
             centre_s_x = width // 2
-            face_centre_x = (x1 + x2) // 2
+            centre_s_y = height // 2  
+            face_centre_x = (x1 + x2) // 2 
             face_centre_y = (y1 + y2) // 2
             face = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0),
                           int(round(height / 200)), 0, 0)
             centre_f = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
-            cv2.rectangle(frame, (centre_s_x - square_size, centre_s_x - square_size), 
-                        (centre_s_x + square_size, centre_s_x + square_size), (0, 255, 0), int(round(height / 200)), 0, 0)
+            cv2.rectangle(frame, (centre_s_x - 25, centre_s_y - 25), 
+                        (centre_s_x + 25, centre_s_y + 25), (0, 255, 0), int(round(height / 200)), 0, 0)
                        
-            if centre_s_x - square_size <= face_centre_x  <= centre_s_x + square_size :
+            if x1 <= centre_s_x - 25 <= x2 and x1 <= centre_s_x + 25 <= x2:
                 pass    #khuon mat trong hinh vuong giua thi khong dieu khien
             else:
-                pan_position = int(((face_centre_x - centre_s_x) / (square_size )) * 180)  #thay doi goc quay ngang
+                pan_position = int(face_centre_x - centre_s_x)  #thay doi goc quay ngang
                 
                 arduino.write(b'X')
                 arduino.write(str(pan_position).encode())
