@@ -5,16 +5,17 @@ arduino =serial.Serial('COM3', 9600)
 time.sleep(2)
 print("Connecting to Arduino ...")
 
-cam = cv2.VideoCapture(1) # (0) chỉ số của camera
+cam = cv2.VideoCapture(0) # (0) chỉ số của camera
 time.sleep(2)
 
 def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy 
     height = frame.shape[0]
     width = frame.shape[1]
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (400, 400), (104, 117, 123), False, False) 
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (200, 200), (104, 117, 123), False, False) 
     net.setInput(blob)
     detections = net.forward()
     boxes = []
+    first_face_detected = 0
 
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]
@@ -28,12 +29,14 @@ def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy
             centre_s_y = height // 2 
             face_centre_x = (x1 + x2) // 2
             face_centre_y = (y1 + y2) // 2
-            face = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0),
-                          int(round(height / 200)))
-            #circle_s = cv2.circle(frame, (centre_s_x, centre_s_y) , 3, (0,255,0), 3)
-            centre_face = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
-            centre_s = cv2.rectangle(frame, (centre_s_x - 5, centre_s_x - 5), 
-                        (centre_s_x + 5, centre_s_x + 5), (0, 255, 0), int(round(height / 200)))
+            if not first_face_detected:
+                first_face_detected =1
+                face = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0),
+                            int(round(height / 200)))
+                #circle_s = cv2.circle(frame, (centre_s_x, centre_s_y) , 3, (0,255,0), 3)
+                centre_face = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
+                centre_s = cv2.rectangle(frame, (centre_s_x - 5, centre_s_x - 5), 
+                            (centre_s_x + 5, centre_s_x + 5), (0, 255, 0), int(round(height / 200)))
             
             
             if x1 < centre_s_x < x2 and \
@@ -60,7 +63,7 @@ while 1:
     frame = cv2.resize(frameOriginal, (700, 700)) 
     
     outDNN, boxes = detecteFaceDNN(net, frame)
-    m_frame = cv2.flip(frame, 0)
+    m_frame = cv2.flip(frame, 1)
     cv2.imshow("Face Detection", m_frame)
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
