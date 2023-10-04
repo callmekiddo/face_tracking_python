@@ -12,7 +12,7 @@ time.sleep(2)
 def detecteFaceDNN(net, frame, conf_threshold=0.85): #do chinh xac nhan dien khuon mat
     height = frame.shape[0]
     width = frame.shape[1]
-    square_size = 50
+    square_size = 5
     blob = cv2.dnn.blobFromImage(frame, 1.6, (430, 430), (104, 117, 123), False, False)
     net.setInput(blob)
     detections = net.forward()
@@ -39,8 +39,8 @@ def detecteFaceDNN(net, frame, conf_threshold=0.85): #do chinh xac nhan dien khu
             centre_s_y - square_size <= face_centre_y  <= centre_s_y + square_size:
                 pass    #khuon mat trong hinh vuong giua thi khong dieu khien
             else:
-                pan_position = int(((face_centre_x - centre_s_x) / (square_size )) * 180)  #thay doi goc quay ngang
-                tilt_position = int(((face_centre_y - centre_s_y) / (square_size )) * 180)  #thay doi goc quay doc
+                pan_position = int(face_centre_x - centre_s_x)  #thay doi goc quay ngang
+                tilt_position = int(face_centre_y - centre_s_y)  #thay doi goc quay doc
                 
                 arduino.write(b'X')
                 arduino.write(str(pan_position).encode())
