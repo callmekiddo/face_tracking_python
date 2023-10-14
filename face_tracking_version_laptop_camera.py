@@ -1,9 +1,9 @@
 import cv2, time
 import serial
 
-arduino =serial.Serial('COM3', 9600)
-time.sleep(2)
-print("Connecting to Arduino ...")
+# arduino =serial.Serial('COM3', 9600)
+# time.sleep(2)
+# print("Connecting to Arduino ...")
 
 cam = cv2.VideoCapture(0)
 time.sleep(2)
@@ -16,7 +16,8 @@ def detecteFaceDNN(net, frame, conf_threshold=0.85): #do chinh xac nhan dien khu
     blob = cv2.dnn.blobFromImage(frame, 1.6, (430, 430), (104, 117, 123), False, False)
     net.setInput(blob)
     detections = net.forward()
-    boxes = []
+    boxes =[]
+    first_face = False
 
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]
@@ -30,10 +31,12 @@ def detecteFaceDNN(net, frame, conf_threshold=0.85): #do chinh xac nhan dien khu
             centre_s_y = height // 2   
             face_centre_x = (x1 + x2) // 2
             face_centre_y = (y1 + y2) // 2
-            face = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0),
-                          int(round(height / 150)), 0, 0)
-            circle_s = cv2.circle(frame, (centre_s_x, centre_s_y) , 3, (0,255,0), 3)
-            centre_f = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
+            if not first_face:
+                first_face = True
+                face = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0),
+                            int(round(height / 150)), 0, 0)
+                circle_s = cv2.c    ircle(frame, (centre_s_x, centre_s_y) , 3, (0,255,0), 3)
+                centre_f = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
             
             if centre_s_x - square_size <= face_centre_x  <= centre_s_x + square_size and \
             centre_s_y - square_size <= face_centre_y  <= centre_s_y + square_size:
@@ -42,10 +45,10 @@ def detecteFaceDNN(net, frame, conf_threshold=0.85): #do chinh xac nhan dien khu
                 pan_position = int(face_centre_x - centre_s_x)  #thay doi goc quay ngang
                 tilt_position = int(face_centre_y - centre_s_y)  #thay doi goc quay doc
                 
-                arduino.write(b'X')
-                arduino.write(str(pan_position).encode())
-                arduino.write(b'Y')
-                arduino.write(str(tilt_position).encode())
+                # arduino.write(b'X')
+                # arduino.write(str(pan_position).encode())
+                # arduino.write(b'Y')
+                # arduino.write(str(tilt_position).encode())
     return frame, boxes
 
 modelFile = "res10_300x300_ssd_iter_140000_fp16.caffemodel"

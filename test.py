@@ -39,17 +39,17 @@ def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy
                             (centre_s_x + 5, centre_s_x + 5), (0, 255, 0), int(round(height / 200)))
             
             
-            if x1 < centre_s_x < x2 and \
-                y1 < centre_s_y < y2:
-                pass    # chấm giữa mặt trong hình vuông giữa thì không diều khiển
-            else:
-                pan_position = int(face_centre_x - centre_s_x) # thay đổi góc quay ngang
-                tilt_position = int(face_centre_y - centre_s_y)  # thay đổi góc quay dọc
+            # if x1 < centre_s_x < x2 and \
+            #     y1 < centre_s_y < y2:
+            #     pass    # chấm giữa mặt trong hình vuông giữa thì không diều khiển
+            # else:
+            #     pan_position = int(face_centre_x - centre_s_x) # thay đổi góc quay ngang
+            #     tilt_position = int(face_centre_y - centre_s_y)  # thay đổi góc quay dọc
                 
-                # arduino.write(b'X')
-                # arduino.write(str(pan_position).encode())
-                # arduino.write(b'Y')
-                # arduino.write(str(tilt_position).encode())
+            #     arduino.write(b'X')
+            #     arduino.write(str(pan_position).encode())
+            #     arduino.write(b'Y')
+            #     arduino.write(str(tilt_position).encode())
     return frame, boxes
 
 modelFile = "res10_300x300_ssd_iter_140000_fp16.caffemodel"
