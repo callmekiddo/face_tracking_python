@@ -5,10 +5,10 @@ arduino =serial.Serial('COM3', 9600)
 time.sleep(2)
 print("Connecting to Arduino ...")
 
-cam = cv2.VideoCapture(1) # (0) chỉ số của camera
+cam = cv2.VideoCapture(1) # chỉ số của camera
 time.sleep(2)
 
-def detecteFaceDNN(net, frame, conf_threshold=0.62): # ngưỡng tin cậy 
+def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy 
     height = frame.shape[0]
     width = frame.shape[1]
     blob = cv2.dnn.blobFromImage(frame, 1.0, (320, 320), (104, 117, 123), False, False) 
@@ -34,9 +34,9 @@ def detecteFaceDNN(net, frame, conf_threshold=0.62): # ngưỡng tin cậy
                 face = cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0),
                             int(round(height / 200)))
                 circle_s = cv2.circle(frame, (centre_s_x, centre_s_y) , 3, (0,255,0), 3)
-                centre_face = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
+                # centre_face = cv2.circle(frame, (face_centre_x, face_centre_y), 3 ,(0, 255, 0), 3)
             
-            if x1 <= centre_s_x <= x2 and y1 <= centre_s_y <= y2 :
+            if x1 < centre_s_x < x2 and y1 < centre_s_y < y2 :
                 pass    # chấm giữa trong hình mặt thì không diều khiển
             else:
                 pan_position = int(face_centre_x - centre_s_x) # thay đổi góc quay ngang
@@ -48,7 +48,7 @@ def detecteFaceDNN(net, frame, conf_threshold=0.62): # ngưỡng tin cậy
                 arduino.write(str(tilt_position).encode())
     return frame, boxes
 
-modelFile = "res10_300x300_ssd_iter_140000_fp16.caffemodel"
+modelFile = "res10_300x300_ssd_iter_140000_fp16.caffemodel" 
 configFile = "deploy.prototxt"
 net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
