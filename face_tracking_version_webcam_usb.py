@@ -4,18 +4,21 @@ import threading
 import time
 from playsound import playsound
 from datetime import datetime
-arduino =serial.Serial('COM6', 9600)
+
+# arduino =serial.Serial('COM6', 9600)
 
 print("Connecting to Arduino ...")
-cam = cv2.VideoCapture(1) # chỉ số của camera
-alertFilePath = "Alert.mp3"
+cam = cv2.VideoCapture(0) # chỉ số của camera
+alertFilePath = "Alert2.mp3"
 isAlert = False
 isSavingImage = False
 
 def alert() : 
-    global isAlert
-    playsound(alertFilePath)
-    isAlert = False
+    if(datetime.now().hour > 23):
+        if(datetime.now().hour < 5):
+            global isAlert
+            playsound(alertFilePath)
+            isAlert = False
 
 def saveImage(frame) : 
     global isSavingImage
@@ -73,10 +76,10 @@ def detecteFaceDNN(net, frame, conf_threshold=0.7): # ngưỡng tin cậy
                 
                 pan_position = int(face_centre_x - centre_s_x)
                 tilt_position = int(face_centre_y - centre_s_y) 
-                arduino.write(b'X')
-                arduino.write(str(pan_position).encode())
-                arduino.write(b'Y')
-                arduino.write(str(tilt_position).encode()) 
+                # arduino.write(b'X')
+                # arduino.write(str(pan_position).encode())
+                # arduino.write(b'Y')
+                # arduino.write(str(tilt_position).encode()) 
     
     return frame, boxes
 
@@ -89,7 +92,6 @@ net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
 while 1:
     ret, frameOriginal = cam.read()
     frame = cv2.resize(frameOriginal, (700, 700)) 
-    
     outDNN, boxes = detecteFaceDNN(net, frame)
     m_frame = cv2.flip(frame, 0)
     cv2.imshow("Face Detection", m_frame)
